@@ -215,7 +215,7 @@ main(int argc, char *argv[])
     Word_t Groups;		// Number of measurement groups
     Word_t grp;
 
-    char c;
+    int  c;
     extern char *optarg;
 
 //////////////////////////////////////////////////////////////
