@@ -43,7 +43,7 @@
 // #define JU_xxxxxxx 1         // read timeit.h
 // #define JU_LINUX_IA32 1      // I.E. IA32 Linux
 //
-// #include "timeit.h"             // optional for high resolution times
+#include "timeit.h"             // optional for high resolution times
 
 double    DeltaUSec;            // Global for remembering delta times
 
@@ -397,7 +397,7 @@ main(int argc, char *argv[])
             break;
 
         case 'v':
-            vFlag = 1;          // time Searching
+            vFlag = 1;         // time Searching
             break;
 
         case '1':              // time Judy1
@@ -517,8 +517,9 @@ main(int argc, char *argv[])
 //      Count number of measurements needed (10K max)
         sum = numb = 1;
         for (Groups = 2; Groups < 10000; Groups++)
-            if (NextNumb(&numb, &sum, Mult, nElms))
-                break;
+        {
+            if (NextNumb(&numb, &sum, Mult, nElms)) break;
+        }
 
 //      Get memory for measurements
         Pms = (Pms_t) calloc(Groups, sizeof(ms_t));
@@ -1593,26 +1594,23 @@ NextNumb(Word_t *PNumber,       // pointer to returned next number
          double DMult,          // Multiplier
          Word_t MaxNumb)        // Max number to return
 {
-    Word_t    num;
-
 //  Save prev number
-    Word_t    PrevNumb = *PNumber;
+    double    PrevPDNumb = *PDNumb;
+    double    DDiff;
 
-//  Verify integer number increased
-    for (num = 0; num < 1000; num++)
-    {
-//      Calc next number
+//  Calc next number >= 1.0 beyond previous
+    do {
         *PDNumb *= DMult;
+        DDiff    = *PDNumb - PrevPDNumb;
 
-//      Return it in integer format
-        *PNumber = (Word_t)(*PDNumb + 0.5);
+    } while (DDiff < 0.5);
 
-        if (*PNumber != PrevNumb)
-            break;
-    }
+//  Return it in integer format
+    if (DDiff < 100.0) *PNumber += (Word_t)(DDiff + 0.5);
+    else               *PNumber = *PDNumb + 0.5;
 
 //  Verify it did not exceed max number
-    if ((*PDNumb + 0.5) > (double)MaxNumb)
+    if (*PNumber >= MaxNumb)
     {
 //      it did, so return max
         *PNumber = MaxNumb;
